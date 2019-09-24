@@ -28,7 +28,7 @@ for i = 1:86
     raman.corr(i,1) = raman.corrfile(i,2)*raman.raw(i,4)/4.61251545;
 end
 % Calculate area under Raman peak
-raman_area = trapz(smooth(raman.corrfile(6:64,1)));
+raman_area = trapz(smooth(raman.corr(6:64,1)));
 % Input dilution factor (use if sample was diluted!)
 dilution_factor = 1; % use this if you want
 %
@@ -100,30 +100,26 @@ x = excitation;
 xend = x(xlen);
 yend = y(ylen);
 %
-%INTERPOLATING THE DATA
+%INTERPOLATING THE DATA (side note: why is the data being interpolated?)
 %
 [xi, yi] = meshgrid(x(1):2.5:xend, y(1):1:yend); %defines wavelengths to interpolate to (ex by 2.5 and em by 1)
-z = A(1:ylen, 1:xlen); %redefines 'A' as 'z'
+z = A.data(1:ylen, 1:xlen); %redefines 'A' as 'z'
 zi = interp2(x, y, z, xi, yi, 'spline'); %interpolation
 %
-%READ IN THE EX AND EM CORRECTION FILES (NOTE: EX FILE IS INVERTED....IF
-%YOU DON'T INVERT THEN CHANGE EQUATION BELOW (LINE 78) TO DIVIDE BY EX CORRECTION)
-% 
-% DOUBLE CHECK THIS!!!!! WAS WRONG ORIGINALLY - NEED TO USE UPDATED
-% CORRECT FILES
+%READ IN THE EX AND EM CORRECTION FILES
 %
-temp = strcat(folder,folder_e,fld,'mcorrect_f4_350_550_1.xls');    
+temp = strcat(folder,fld,folder_e,fld,'mcorrect_f4_300_600_1_corr.xls');    
 MC = xlsread(temp);
-temp = strcat(folder,folder_e,fld,'xcorrect_f4_240_450_12_5.xls');   
+temp = strcat(folder,fld,folder_e,fld,'xcorrect_f4_240_450_12_5_corr.xls');   
 XC = xlsread(temp);
 %
 %APPLYING EX AND EM CORRECTIONS WITH MATRIX ALGEBRA
 %
-X=diag(XC); %creates ex correction matrix
+X=diag(XC(:,2)); %creates ex correction matrix
 %
-Y=diag(MC); %creates em correcting matrix
+Y=diag(MC(:,2)); %creates em correcting matrix
 %
-zi=[[zi*X]'*Y]'; %applies corrections
+zi=[[zi/X]'*Y]'; %applies corrections
 %
 %CALCULATES FI (EX=370; EM470/EM520)
 FI=zi(121,53)/zi(171,53); 
@@ -149,7 +145,7 @@ ex_abs=iabs_ex1(21:105,:); %selects data from 240-450 (ex range)
 ex_abs=ex_abs'; %moves data from rows to columns
 %
 abs = flipud(abs);
-em_abs=abs(161:361,:); %selects data from 350-550 (em range)
+em_abs=abs(111:411,:); %selects data from 300-600 (em range)
 %
 em_abs=em_abs(:,2:2); %cuts wavelength labels and stnd. dev. from file
 %
