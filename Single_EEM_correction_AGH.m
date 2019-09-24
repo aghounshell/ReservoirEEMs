@@ -1,7 +1,7 @@
 % code written by Rose M. Cory
 % code adapted by D. Scott, 20101030
 % Updated by A.G. Hounshell, 20190924
-% TEST GIT
+
 % Purpose of this code is to correct and plot an EEM. corrected EEMs and
 % Figures are saved to set folders. 
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -15,7 +15,8 @@
 folder = 'C:\Users\ahounshell\Documents\VT_PostDoc\EEMs\20190703\';
 sample = '1';
 fld = '\';                  % / for mac; \ for PC
-% UPDATE TO CALCULATE RAMAN AREA FROM RAMAN SCAN EACH DAY
+% Calculate Raman Area using the Raman Scan collected on the same day as
+% analysis
 raman_area = 1.2736e7   %enter respective raman area for each EEM, intensities will be normalized to this value
 dilution_factor = 1; %use this if you want
 %
@@ -68,7 +69,6 @@ abs_ex1 = flipud(abs_ex1); % flips
 %% Step 5. Define excitation and emission wavelengths. Ensure correct!!
 %
 % Define excitation wavelengths
-% MAY NEED TO UPDATE FOR CHANGED EEMS RANGE
 %
 excitation = (240:5:450); % defines ex wavelengths
 %
