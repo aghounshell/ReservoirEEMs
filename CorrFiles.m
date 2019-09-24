@@ -62,7 +62,7 @@ for i = 1:2:301
     mcorr.nm2(icount,2) = mcorr.one(i,2);
 end
 % Export file
-xlswrite('xcorr_300_600_2.xls',mcorr.nm2);
+xlswrite('mcorr_300_600_2.xls',mcorr.nm2);
 
 % Data files saved in
 % 'C:\Users\ahoun\Dropbox\Reservoir_EEMs\Instrument_CorrFiles'
