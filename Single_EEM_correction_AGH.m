@@ -12,13 +12,25 @@
 %
 % Note: forward slash on Apple/backward slash on PC
 %
-folder = 'C:\Users\ahounshell\Documents\VT_PostDoc\EEMs\20190703\';
+folder = 'C:\Users\ahoun\Dropbox\Reservoir_EEMs\EEMs_Corr_Scotty';
 sample = '1';
 fld = '\';                  % / for mac; \ for PC
 % Calculate Raman Area using the Raman Scan collected on the same day as
 % analysis
-raman_area = 1.2736e7   %enter respective raman area for each EEM, intensities will be normalized to this value
-dilution_factor = 1; %use this if you want
+% Select Raman File
+[datafile_name, directory_name] = uigetfile({'*.csv'},'Choose file for processing');
+cd(directory_name);
+data = importdata(datafile_name);
+raman.raw = data; % save the original file.
+% Apply instrument corrections to Raman file
+raman.corrfile = xlsread('mcorrect_raman.xls');
+for i = 1:86
+    raman.corr(i,1) = raman.corrfile(i,2)*raman.raw(i,4)/4.61251545;
+end
+% Calculate area under Raman peak
+raman_area = trapz(smooth(raman.corrfile(6:64,1)));
+% Input dilution factor (use if sample was diluted!)
+dilution_factor = 1; % use this if you want
 %
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -39,27 +51,22 @@ blankabs = 'b_abs.csv';
 %
 %% STEP 2. READ IN EEM
 %
-temp = strcat(folder,folder_f,fld,sample,sampleext);   % file name
-importfile(temp);
-A = data;
-% A = importdata(temp);
+temp = strcat(folder,fld,folder_f,fld,sample,sampleext);   % file name
+A = importdata(temp);
 clear colheaders textdata data temp;
 ifile = strcat(sample,samplecor);    %whatever you want to name the output file
 %
 %% Step 3. Read in blank EEM
 %
-temp = strcat(folder,folder_b,fld,fnm_blank_eem);    
-importfile(temp);
-Ab = data;
+temp = strcat(folder,fld,folder_b,fld,fnm_blank_eem); 
+Ab = importdata(temp);
 clear colheaders textdata data temp;
 %
 %% Step 4. Read in Absorbance file for corrections
 %
-temp = strcat(folder,folder_a,fld,sample,sampleabs);    
-%abs = csvread('/Volumes/durelles/science/flourescence/2010/test/absorbance/pony_dil.csv',0,0);   %read in absorbance file for inner filter correction (see below for the actual correction)
+temp = strcat(folder,fld,folder_a,fld,sample,sampleabs);    
 abs = csvread(temp,0,0);
-temp = strcat(folder,folder_a,fld,blankabs);    
-%absb = csvread('/Volumes/durelles/science/flourescence/2010/test/absorbance/blank.csv',0,0);   %read in absorbance blank file for inner filter correction (see below for the actual correction)
+temp = strcat(folder,fld,folder_a,fld,blankabs);    
 absb = csvread(temp,0,0);
 abs(:,2) = abs(:,2) - absb(:,2); % subtract blank absorbance
 clear absb
@@ -73,16 +80,16 @@ abs_ex1 = flipud(abs_ex1); % flips
 excitation = (240:5:450); % defines ex wavelengths
 %
 % Define emission wavelengths, cut labels from matrix A (uncorrected EEM)
-Asize = size(A);
-emissionLen = Asize(1) ;
-emission =   A(1:emissionLen, 1);  
+Asize = size(A.data);
+emissionLen = Asize(1);
+emission =   300:2:600;  % May need to change based on wavelengths used
 % Cut emission wavelengths from A and Ab (blank matrix)
-A=A(:,2:44); %cuts em wavelengths from 'A'
-Ab = Ab(:,2:44)
+A.data = A.data(2:152,:); %cuts em wavelengths from 'A'
+Ab.data = Ab.data(2:152,:);
 % Substract blank EEM from sample EEM
-A = A-Ab
+A.data = A.data-Ab.data;
 clear Ab
-Asize = size(A);
+Asize = size(A.data);
 %
 %REDEFINES EX AND EM AS X AND Y
 %
