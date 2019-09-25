@@ -13,7 +13,7 @@
 % Note: forward slash on Apple/backward slash on PC
 %
 folder = 'C:\Users\ahoun\Dropbox\Reservoir_EEMs\EEMs_Corr_Scotty';
-sample = '1';
+sample = '3';
 fld = '\';                  % / for mac; \ for PC
 % Calculate Raman Area using the Raman Scan collected on the same day as
 % analysis
@@ -30,7 +30,7 @@ end
 % Calculate area under Raman peak
 raman_area = trapz(smooth(raman.corr(6:64,1)));
 % Input dilution factor (use if sample was diluted!)
-dilution_factor = 1; % use this if you want
+dilution_factor = 1;
 %
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -80,16 +80,15 @@ abs_ex1 = flipud(abs_ex1); % flips
 excitation = (240:5:450); % defines ex wavelengths
 %
 % Define emission wavelengths, cut labels from matrix A (uncorrected EEM)
-Asize = size(A.data);
-emissionLen = Asize(1);
-emission =   300:2:600;  % May need to change based on wavelengths used
 % Cut emission wavelengths from A and Ab (blank matrix)
 A.data = A.data(2:152,:); %cuts em wavelengths from 'A'
 Ab.data = Ab.data(2:152,:);
+Asize = size(A.data);
+emissionLen = Asize(1);
+emission =   300:2:600;  % May need to change based on wavelengths used
 % Substract blank EEM from sample EEM
 A.data = A.data-Ab.data;
 clear Ab
-Asize = size(A.data);
 %
 %REDEFINES EX AND EM AS X AND Y
 %
@@ -113,16 +112,16 @@ MC = xlsread(temp);
 temp = strcat(folder,fld,folder_e,fld,'xcorrect_f4_240_450_12_5_corr.xls');   
 XC = xlsread(temp);
 %
-%APPLYING EX AND EM CORRECTIONS WITH MATRIX ALGEBRA
+%APPLYING EX AND EM CORRECTIONS
 %
-X=diag(XC(:,2)); %creates ex correction matrix
-%
-Y=diag(MC(:,2)); %creates em correcting matrix
-%
-zi=[[zi/X]'*Y]'; %applies corrections
+for i = 1:301
+    for j = 1:85
+       zi(i,j) = zi(i,j)/XC(j,2)*MC(i,2); 
+    end
+end
 %
 %CALCULATES FI (EX=370; EM470/EM520)
-FI=zi(121,53)/zi(171,53); 
+FI=zi(171,53)/zi(221,53); 
 %
 %NORMALIZES CORRECTED DATA TO RAMAN AREA
 %
@@ -130,38 +129,33 @@ zir=zi/raman_area;
 %
 % ---------------------------------
 %INNERFILTER CORRECTION
-abs_ex1=abs_ex1(:,2:2); %cuts wavelength labels and stnd. dev. from file
-%
 ao = 190:5:850; %defines wavelength range
 %
 ai = 190:2.5:850; %defines wavelength range to interpolate to
 %
-iabs_ex1 = interp1(ao,abs_ex1,ai); %interpolates to 2.5 nm
+iabs_ex1(:,1) = flipud(ai');
+iabs_ex1(:,2) = interp1(ao,abs_ex1(:,2),ai); %interpolates to 2.5 nm
 %
-iabs_ex1 = (iabs_ex1)'; %moves data from columns to rows
-%
-ex_abs=iabs_ex1(21:105,:); %selects data from 240-450 (ex range)
-%
-ex_abs=ex_abs'; %moves data from rows to columns
+ex_abs=iabs_ex1(161:245,:); %selects data from 240-450 (ex range)
+ex_abs=flipud(ex_abs);
 %
 abs = flipud(abs);
-em_abs=abs(111:411,:); %selects data from 300-600 (em range)
-%
-em_abs=em_abs(:,2:2); %cuts wavelength labels and stnd. dev. from file
+em_abs=abs(251:551,:); %selects data from 300-600 (em range)
+em_abs=flipud(em_abs);
 %
 for i=1:length(em_abs)
     for j=1:length(ex_abs)
-        IFC(i,j)=ex_abs(j)+em_abs(i); %defines 'IFC' as the sum of the ex and em wavelengths for all ex/em pairs 
+        IFC(i,j)=ex_abs(j,2)+em_abs(i,2); %defines 'IFC' as the sum of the ex and em wavelengths for all ex/em pairs 
     end
 end
 czir=zir.*10.^(0.5*IFC); %applies inner filter correction
 %
 % CALCULATES FI AFTER ALL CORRECTIONS HAVE BEEN APPLIED
-FInew=czir(121,53)/czir(171,53); %calculates FI ex=370 nm em470/em520
+FInew=czir(171,53)/czir(221,53); %calculates FI ex=370 nm em470/em520
 %
 %SAVE THE RAMAN NORMALIZED AND EX, EM, AND INNER FILTERED CORRECTED EEM MATRIX
 %
-pathname = strcat(folder,folder_d,fld);
+pathname = strcat(folder,fld,folder_d,fld);
 %
 for i=1:length(ifile)
     pathname(length(pathname) + 1) = ifile(i);
@@ -178,7 +172,7 @@ save(pathname, 'czir', '-ascii', '-double', '-tabs');
 %% PLOTS THE EEM 3D CONTOUR STYLE, 
 ex = 240:2.5:450;
 
-em = 350:1:550; 
+em = 300:1:600; 
 
 %A=czir';
 A=czir;
@@ -209,7 +203,7 @@ H = colorbar('vert');
 
 set(H,'fontsize',14);
 
-pathname = strcat(folder,folder_c,fld);
+pathname = strcat(folder,fld,folder_c,fld);
 
 for i=1:length(ifile)
 
