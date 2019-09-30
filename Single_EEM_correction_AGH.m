@@ -13,7 +13,7 @@
 % Note: forward slash on Apple/backward slash on PC
 %
 folder = 'C:\Users\ahoun\Dropbox\Reservoir_EEMs\EEMs_Corr_Scotty';
-sample = '3';
+sample = '4';
 fld = '\';                  % / for mac; \ for PC
 % Calculate Raman Area using the Raman Scan collected on the same day as
 % analysis
