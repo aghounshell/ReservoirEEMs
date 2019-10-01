@@ -1,6 +1,9 @@
 % code written by Rose M. Cory
 % code adapted by D. Scott, 20101030
 % Updated by A.G. Hounshell, 20190924
+%   Calcuate Raman_Area from daily Raman Scan
+%   Updated Instrument correction files
+%   Use 'for loop' to calculate instrument Ex and Em corrections
 
 % Purpose of this code is to correct and plot an EEM. corrected EEMs and
 % Figures are saved to set folders. 
@@ -12,8 +15,10 @@
 %
 % Note: forward slash on Apple/backward slash on PC
 %
-folder = 'C:\Users\ahoun\Dropbox\Reservoir_EEMs\EEMs_Corr_Scotty';
-sample = '4';
+% Select folder where data is located
+folder = 'C:\Users\ahoun\Dropbox\Reservoir_EEMs\30Sep19';
+% Input sample number
+sample = '2';
 fld = '\';                  % / for mac; \ for PC
 % Calculate Raman Area using the Raman Scan collected on the same day as
 % analysis
@@ -21,7 +26,7 @@ fld = '\';                  % / for mac; \ for PC
 [datafile_name, directory_name] = uigetfile({'*.csv'},'Choose file for processing');
 cd(directory_name);
 data = importdata(datafile_name);
-raman.raw = data; % save the original file.
+raman.raw = data.data; % save the original file.
 % Apply instrument corrections to Raman file
 raman.corrfile = xlsread('mcorrect_raman.xls');
 for i = 1:86
@@ -99,7 +104,7 @@ x = excitation;
 xend = x(xlen);
 yend = y(ylen);
 %
-%INTERPOLATING THE DATA (side note: why is the data being interpolated?)
+%INTERPOLATING THE DATA
 %
 [xi, yi] = meshgrid(x(1):2.5:xend, y(1):1:yend); %defines wavelengths to interpolate to (ex by 2.5 and em by 1)
 z = A.data(1:ylen, 1:xlen); %redefines 'A' as 'z'
@@ -112,7 +117,7 @@ MC = xlsread(temp);
 temp = strcat(folder,fld,folder_e,fld,'xcorrect_f4_240_450_12_5_corr.xls');   
 XC = xlsread(temp);
 %
-%APPLYING EX AND EM CORRECTIONS
+%APPLYING EX AND EM CORRECTIONS: Using Matlab for loop
 %
 for i = 1:301
     for j = 1:85
@@ -159,8 +164,8 @@ pathname = strcat(folder,fld,folder_d,fld);
 %
 for i=1:length(ifile)
     pathname(length(pathname) + 1) = ifile(i);
-end%
-
+end
+%
 pathnamelength = length(pathname);
 %
 pathname(pathnamelength + 1: pathnamelength + 4) = '.xls';
