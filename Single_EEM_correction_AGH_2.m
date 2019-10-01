@@ -155,7 +155,7 @@ FInew=czir(171,53)/czir(221,53); %calculates FI ex=370 nm em470/em520
 %
 %% Remove area around Raman Scatttering (AGH); for visualization
 corr.X = czir;
-corr.Em = em';
+corr.Em = em_abs(:,1);
 corr.Ex = ex_abs(:,1);
 
 % Remove Rayleigh Scattering bands
@@ -179,6 +179,8 @@ for i = 1:301
         end
     end
 end
+
+czir = corr.test2;
 
 %SAVE THE RAMAN NORMALIZED AND EX, EM, AND INNER FILTERED CORRECTED EEM MATRIX
 %
