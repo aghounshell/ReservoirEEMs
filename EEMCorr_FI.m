@@ -1,3 +1,4 @@
+function EEMCorr_FI
 % code written by Rose M. Cory
 % code adapted by D. Scott, 20101030
 % Updated by A.G. Hounshell, 20190924
@@ -7,9 +8,9 @@
 % Updated by A.G. Hounshell, 20191114
 %   Added to code to calculate fluorescence indices
 %   Adapt code to select files for processing
+%   Adapted to a function
 
-% Purpose of this code is to correct and plot an EEM. corrected EEMs and
-% Figures are saved to set folders. 
+% Purpose of this code is to correct and plot an EEM.
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -21,9 +22,9 @@ dilution_factor = 4;
 % Calculate Raman Area using the Raman Scan collected on the same day as
 % analysis
 % Select Raman File
-[datafile_name, directory_name] = uigetfile({'*.csv'},'Choose Raman Scan');
+[raman_name, directory_name] = uigetfile({'*.csv'},'Choose Raman Scan');
 cd(directory_name);
-data = importdata(datafile_name);
+data = importdata(raman_name);
 raman.raw = data.data; % save the original file.
 % Apply instrument corrections to Raman file
 raman.corrfile = xlsread('mcorrect_raman.xls');
@@ -51,22 +52,22 @@ ifile = strcat(sample,samplecor);    %whatever you want to name the output file
 %
 %% Step 3. Read in blank EEM
 %
-[datafile_name, directory_name] = uigetfile({'*.csv'},'Choose Blank EEM');
+[blankfile_name, directory_name] = uigetfile({'*.csv'},'Choose Blank EEM');
 cd(directory_name);
-Ab = importdata(datafile_name);
+Ab = importdata(blankfile_name);
 Abdata = Ab.data(2:end,:);
 MyData.blank = Abdata; % save the original file.
 %
 %% Step 4. Read in Absorbance file for corrections
 %
 % Select sample absorbance scan
-[datafile_name, directory_name] = uigetfile({'*.csv'},'Choose Absorbance Scan');
+[absfile_name, directory_name] = uigetfile({'*.csv'},'Choose Absorbance Scan');
 cd(directory_name);
-abs = importdata(datafile_name);
+abs = importdata(absfile_name);
 % Choose blank absorbance scan
-[blankfile_name, directory_name] = uigetfile({'*.csv'},'Choose Blank Absorbance Scan');
+[absbfile_name, directory_name] = uigetfile({'*.csv'},'Choose Blank Absorbance Scan');
 cd(directory_name);
-absb = importdata(blankfile_name);
+absb = importdata(absbfile_name);
 % Subract blank scan from sample scan
 abs(:,2) = abs(:,2) - absb(:,2); % subtract blank absorbance
 clear absb
@@ -220,3 +221,5 @@ colorbar('vert','FontName','Times','FontSize',18)
 xlabel('Excitation wavelength (nm)')
 ylabel('Emission wavelength (nm)')
 title([datafile_name(1:end-4),' (RU)'])
+
+% end EEMCorr_FI.m
