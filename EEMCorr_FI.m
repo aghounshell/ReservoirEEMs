@@ -142,7 +142,7 @@ em_abs=flipud(em_abs);
 %
 for i=1:length(em_abs)
     for j=1:length(ex_abs)
-        IFC(i,j)=ex_abs(j,2)+em_abs(i,2); %defines 'IFC' as the sum of the ex and em wavelengths for all ex/em pairs 
+        IFC(i,j)=(ex_abs(j,2)*dilution_factor)+(em_abs(i,2)*dilution_factor); %defines 'IFC' as the sum of the ex and em wavelengths for all ex/em pairs 
     end
 end
 czir=zir.*10.^(0.5*IFC); %applies inner filter correction
