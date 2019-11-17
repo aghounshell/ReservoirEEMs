@@ -17,7 +17,7 @@ function EEMCorr_FI
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %% STEP 1. CALCULATE RAMAN AREA USING RAMAN SCAN FROM THE SAME DAY
 % INPUT DILUTION FACTOR (use if sample was diluted!)
-dilution_factor = 4;
+dilution_factor = 1;
 
 % Calculate Raman Area using the Raman Scan collected on the same day as
 % analysis
@@ -56,7 +56,7 @@ ifile = strcat(sample,samplecor);    %whatever you want to name the output file
 cd(directory_name);
 Ab = importdata(blankfile_name);
 Abdata = Ab.data(2:end,:);
-MyData.blank = Abdata; % save the original file.
+MyData.blank = Abdata; % save the original blank file.
 %
 %% Step 4. Read in Absorbance file for corrections
 %
@@ -86,10 +86,13 @@ A.data = A.data(2:end,:); %cuts em wavelengths from 'A'
 Ab.data = Ab.data(2:end,:);
 Asize = size(A.data);
 emissionLen = Asize(1);
+%
 emission =   300:2:600;  % May need to change based on wavelengths used
+%
 % Substract blank EEM from sample EEM
 A.data = A.data-Ab.data;
 clear Ab
+MyData.Sub = A.data % Save blank subtracted EEM
 %
 %REDEFINES EX AND EM AS X AND Y
 %
@@ -119,10 +122,13 @@ for i = 1:301
     end
 end
 %
+MyData.InsCorr = zi; % Save instrument corrected EEM
 %
 %NORMALIZES CORRECTED DATA TO RAMAN AREA
 %
 zir=zi/raman_area; 
+%
+MyData.Norm = zir; % Save raman normalized EEM
 %
 % ---------------------------------
 %INNERFILTER CORRECTION
@@ -146,6 +152,8 @@ for i=1:length(em_abs)
     end
 end
 czir=zir.*10.^(0.5*IFC); %applies inner filter correction
+%
+MyData.IFC = czir; % Save IFC corrected EEM
 %
 % CALCULATES FI AFTER ALL CORRECTIONS HAVE BEEN APPLIED
 FInew=czir(171,53)/czir(221,53); %calculates FI ex=370 nm em470/em520
